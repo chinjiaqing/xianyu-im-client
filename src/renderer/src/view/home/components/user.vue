@@ -1,10 +1,10 @@
 <template>
     <div class="flex user-item relative items-center gap-2 p-4 hover:bg-#f1f5f9 transition-all" v-if="info && info.userId" :class="[info.online ? '' : 'offline']">
         <!-- <Button size="small" class="text-sm user-in absolute right-2 bottom-4 z-2" style="position: absolute;" @click="restoreUser(info.userId)">进入</Button> -->
-        <div class="text-sm user-in absolute right-2 bottom-4 z-2 absolute bg-#10b981 color-#fff px-4 py-1 rounded-1" cursor="pointer" @click="restoreUser(info.userId)">
+        <div class="text-sm user-in absolute right-2 bottom-4 z-2 absolute bg-#10b981 color-#fff px-4 py-1 rounded-1" cursor="pointer" @click="invokeEvent('xianyuReLogin',info.userId)">
             进入
         </div>
-        <div class="font-size-16px user-in absolute right-2 top-2 hover:color-red" title="解绑账号" cursor="pointer" @click="deleteUser(info.userId)">
+        <div class="font-size-16px user-in absolute right-2 top-2 hover:color-red" title="解绑账号" cursor="pointer" @click="invokeEvent('userRemove',info.userId)">
             <div class="i-carbon:close"></div>
         </div>
         <div class="relative">
@@ -32,11 +32,11 @@
 </template>
 
 <script lang="ts" setup>
-import type { User } from '@renderer/types/user';
+import type { GooFishUser } from '@renderer/types/index';
 import dayjs from "dayjs"
-import { restoreUser,toggleUserWsStatus,deleteUser } from '@renderer/hooks/useUser';
+import { invokeEvent } from "@renderer/utils/ipc-invoke";
 defineProps<{
-    info:User
+    info:GooFishUser
 }>()
 
 </script>

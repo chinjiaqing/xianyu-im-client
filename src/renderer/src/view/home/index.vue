@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between py-4">
             <div class="text-lg font-500">欢迎使用</div>
             <div class="flex items-center gap-2">
-                <Button size="small" @click="addUser">
+                <Button size="small" @click="invokeEvent('xianyuLogin')">
                     <img src="https://img.alicdn.com/tfs/TB19WObTNv1gK0jSZFFXXb0sXXa-144-144.png" class="w-4 h-4"
                         style="border-radius: 50%;" alt="">
                     添加账号</Button>
@@ -17,7 +17,7 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div>账号列表</div>
-                <div class="text-sm text-#64748b">({{ userList.length }})</div>
+                <!-- <div class="text-sm text-#64748b">({{ userList.length }})</div> -->
             </div>
             <div class="flex items-center  text-sm gap-1 text-#64748b hover:text-#10b981" cursor="pointer"
                 @click="syncUserList">
@@ -62,18 +62,24 @@
 <script lang="ts" setup>
 import { onMounted, ref,nextTick } from 'vue'
 import User from "./components/user.vue"
-import { userList, syncUserList,addUser} from '@renderer/hooks/useUser/index'
+// import { userList, syncUserList,addUser} from '@renderer/hooks/useUser/index'
 import dayjs from 'dayjs'
 import { LogItem } from '@renderer/types/log'
+import { invokeEvent } from "@renderer/utils/ipc-invoke"
 
 const logList = ref<LogItem[]>([])
 const isReady = ref(false)
+const userList = ref([])
 function handleClearLog() {
     logList.value = []
 }
 
 function handleOpenMhyy() {
     window.electron.ipcRenderer.send('open_mhyy')
+}
+
+function syncUserList(){
+    userList.value = invokeEvent('userList')
 }
 
 onMounted(async () => {

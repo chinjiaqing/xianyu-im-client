@@ -1,7 +1,10 @@
 import { app, shell, BrowserWindow } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon2.png?asset'
+import icon from '../../resources/icon.png?asset'
+import { DEBUG_HOST, DEBUG_PORT } from './config'
+import browserService from './service/browser.service'
+import "./ipc.main"
 async function createWindow(): Promise<void> {
 
     const mainWindow = new BrowserWindow({
@@ -38,6 +41,10 @@ async function createWindow(): Promise<void> {
     } else {
         mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
     }
+
+    mainWindow.on('close',()=>{
+        app.quit()
+    })
     
 }
 
@@ -45,14 +52,15 @@ async function createWindow(): Promise<void> {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 // set debugport
-// app.commandLine.appendSwitch('remote-debugging-port', DEBUG_PORT)
-// app.commandLine.appendSwitch('remote-debugging-address', DEBUG_HOST)
+app.commandLine.appendSwitch('remote-debugging-port', DEBUG_PORT)
+app.commandLine.appendSwitch('remote-debugging-address', DEBUG_HOST)
 app.commandLine.appendSwitch('disable-web-security', 'NetworkService')
 app.commandLine.appendSwitch('user-data-dir', path.resolve(__dirname, '/temp/chrome'))
 app.whenReady().then(async () => {
     electronApp.setAppUserModelId('com.electron')
     app.on('browser-window-created', (_, window) => {
         // bindPuppeteer()
+        browserService.connect()
         optimizer.watchWindowShortcuts(window)
     })
 
