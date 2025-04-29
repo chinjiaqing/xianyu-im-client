@@ -10,19 +10,19 @@ interface ErrorHandler {
 }
 
 class MsgLogHandler implements MessageHandler {
-    handle(msg: MsgFormattedPayload, wsService: XyImService) {
+    handle(msg: MsgFormattedPayload) {
         console.log(`收到消息了---`, msg)
     }
 }
 
 class ImageMsgHandler implements MessageHandler {
-    handle(msg: MsgFormattedPayload, wsService: XyImService) {
+    handle(msg: MsgFormattedPayload) {
         if (msg.type !== MsgTypes.TEXT) return
     }
 }
 
 class TextMsgHandler implements MessageHandler {
-    async handle(msg: MsgFormattedPayload, wsService: XyImService) {
+    async handle(msg: MsgFormattedPayload) {
         if (msg.type !== MsgTypes.TEXT) return
     }
 }
