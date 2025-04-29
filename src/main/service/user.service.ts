@@ -1,6 +1,7 @@
 import { GooFishUser } from '../types'
 import { waitFor } from '../utils'
 import browserService from './browser.service'
+import emitterService from './emitter.service'
 import { XyImService } from './im.service'
 import msgService from './msg.service'
 import sendService from './send.service'
@@ -23,6 +24,7 @@ export class XyUserService {
                 olduser.unread = true
                 userUpdate(olduser)
                 sendService.send2renderer('refreshUserList')
+                emitterService.emit('newMsg',`来自 ${msg.senderName} 的新消息`)
             }
         })
         xyImService.on('connected', () => {

@@ -1,19 +1,18 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, Tray, nativeImage, Menu } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 import { DEBUG_HOST, DEBUG_PORT } from './config'
 import browserService from './service/browser.service'
-import "./ipc.main"
+import './ipc.main'
 import sendService from './service/send.service'
-async function createWindow(): Promise<void> {
-
+import emitterService from './service/emitter.service'
+async function createWindow(): Promise<BrowserWindow> {
     const mainWindow = new BrowserWindow({
         width: 375,
         height: 667,
         show: false,
         autoHideMenuBar: true,
-        ...(process.platform === 'linux' ? { icon } : {}),
+        icon: path.join(app.getAppPath(), 'resources/icon.png'),
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
             sandbox: false,
@@ -43,12 +42,12 @@ async function createWindow(): Promise<void> {
         mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
     }
 
-    mainWindow.on('close',()=>{
-        app.quit()
+    mainWindow.on('close', (e) => {
+        e.preventDefault()
+        mainWindow.hide()
     })
 
-    sendService.setWind(mainWindow)
-    
+    return mainWindow
 }
 
 // This method will be called when Electron has finished
@@ -70,11 +69,61 @@ app.whenReady().then(async () => {
     // 注册ipcMain 事件监听
     // registerAllService()
     // 创建window
-    createWindow()
+    const mainWindow = await createWindow()
+    sendService.setWind(mainWindow)
     app.on('activate', function () {
         // On macOS it's common to re-create a window in the app when the
         // dock icon is clicked and there are no other windows open.
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    })
+
+    // 创建托盘图标（推荐PNG格式适配多平台）
+    let isFlashing = false;
+    let flashInterval;
+    let originalIcon = path.join(app.getAppPath(), 'resources/icon.png')
+    let flashingIcon = path.join(app.getAppPath(), 'resources/icon-flash.png')
+    let tray = new Tray(
+        nativeImage.createFromPath(originalIcon)
+    )
+    function startFlashing() {
+        if (isFlashing) return; // 防止重复启动闪烁
+        isFlashing = true;
+        let toggle = true;
+        flashInterval = setInterval(() => {
+            tray.setImage(nativeImage.createFromPath(toggle ? flashingIcon : originalIcon));
+            toggle = !toggle; // 切换图标
+        }, 500); // 每500毫秒切换一次
+    }
+    
+    function stopFlashing() {
+        if (!isFlashing) return; // 如果没有在闪烁中
+        isFlashing = false;
+        clearInterval(flashInterval);
+        tray.setImage(nativeImage.createFromPath(originalIcon)); // 恢复正常图标
+    }
+    tray.on('click', () => {
+        mainWindow.show()
+    })
+    const contextMenu = Menu.buildFromTemplate([
+        { label: '主界面', click: () => mainWindow.show() },
+        { label: '退出', click: () => app.quit() }
+    ])
+    tray.setContextMenu(contextMenu)
+
+    // 悬停提示
+    tray.setToolTip('闲鱼IM')
+
+    emitterService.on('newMsg', (t) => {
+        tray.setToolTip(t)
+        startFlashing()
+    })
+    mainWindow.on('show',()=>{
+        tray.setToolTip('闲鱼IM')
+        stopFlashing()
+    })
+
+    mainWindow.on('focus',()=>{
+        stopFlashing()
     })
 })
 
