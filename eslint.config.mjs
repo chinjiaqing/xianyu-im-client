@@ -33,7 +33,7 @@ export default tseslint.config(
                     }
                 }
             ],
-            endOfLine: 'auto'
+            endOfLine: 'off'
         }
     },
     eslintConfigPrettier
