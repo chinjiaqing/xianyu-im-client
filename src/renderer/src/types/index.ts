@@ -1,2 +1,2 @@
-export * from "@shared/types/index"
+export * from "../../../shared/types"
 export * from "./log"
