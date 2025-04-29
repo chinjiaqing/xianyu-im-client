@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { DEBUG_HOST, DEBUG_PORT } from './config'
 import browserService from './service/browser.service'
 import "./ipc.main"
+import sendService from './service/send.service'
 async function createWindow(): Promise<void> {
 
     const mainWindow = new BrowserWindow({
@@ -45,6 +46,8 @@ async function createWindow(): Promise<void> {
     mainWindow.on('close',()=>{
         app.quit()
     })
+
+    sendService.setWind(mainWindow)
     
 }
 

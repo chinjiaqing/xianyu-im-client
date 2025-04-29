@@ -10,6 +10,7 @@ import { EventEmitter } from 'node:events'
 interface ImServiceEvents {
     message: (msg: MsgFormattedPayload) => void
     error: (err: Error) => void
+    connected:()=>void
 }
 
 export class XyImService {
@@ -63,6 +64,7 @@ export class XyImService {
             this.sendInitMsg()
             this.sendSyncMsg()
             this.keepHeartBeat()
+            this.emit('connected')
         })
         this.ws.on('message', async (msg) => {
             try {

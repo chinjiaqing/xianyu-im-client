@@ -3,37 +3,65 @@ import { waitFor } from '../utils'
 import browserService from './browser.service'
 import { XyImService } from './im.service'
 import msgService from './msg.service'
-import { userAdd, userGet, userRemove, userUpdate } from './store.service'
+import sendService from './send.service'
+import { userAdd, userGet, userList, userRemove, userUpdate } from './store.service'
 import windowService from './window.service'
 
 export class XyUserService {
     private users = new Map<string, XyImService>()
 
     async userImLogin(user: GooFishUser) {
-        await this.userImLogout(user)
+        this.userImLogout(user)
         const xyImService = new XyImService(user)
         await xyImService.init()
         this.users.set(user.userId, xyImService)
         xyImService.on('message', (msg) => {
             msgService.handleMsg(msg, xyImService)
+            sendService.log2renderer(`新消息`, JSON.stringify(msg))
+            const olduser = userGet(user.userId)
+            if (olduser) {
+                olduser.unread = true
+                userUpdate(olduser)
+                sendService.send2renderer('refreshUserList')
+            }
+        })
+        xyImService.on('connected', () => {
+            const olduser = userGet(user.userId)
+            if (olduser) {
+                olduser.online = true
+                userUpdate(olduser)
+                sendService.log2renderer('im连接成功', user.displayName)
+                sendService.send2renderer('refreshUserList')
+            }
         })
         userAdd(user)
+        sendService.send2renderer('refreshUserList')
     }
 
-    async userImLogout(user: GooFishUser) {
+    async userRemove(user:GooFishUser){
+        this.userImLogout(user)
+        userRemove(user)
+        sendService.log2renderer('解除绑定',user.displayName)
+        sendService.send2renderer('refreshUserList')
+    }
+
+    userImLogout(user: GooFishUser) {
         if (this.users.has(user.userId)) {
             const xyImService = this.users.get(user.userId)
             xyImService?.ws?.close()
             this.users.delete(user.userId)
+            user.online = false
+            userUpdate(user)
         }
-        userRemove(user)
+        sendService.log2renderer('断开连接',user.displayName + ' 断开连接')
+        sendService.send2renderer('refreshUserList')
     }
 
     async login() {
-        console.log('66666666')
         const wind = windowService.createXyWindow()
         const page = await browserService.getPage(wind)
         if (!page) {
+            sendService.log2renderer('登录失败', '无法打开网页', 0)
             // error handler
             return
         }
@@ -48,6 +76,7 @@ export class XyUserService {
             })
         } catch (_) {
             // notifyAndLog('绑定失败', '登录超时，请重试', true)
+            sendService.log2renderer('绑定失败', '登录超时，请重试', 0, true)
             wind.close()
             return
         }
@@ -59,7 +88,7 @@ export class XyUserService {
             cookies: [],
             accessToken: '',
             unread: false,
-            online:false
+            online: false
         }
         if (page.url().endsWith('www.goofish.com/')) {
             page.on('response', async (response) => {
@@ -81,29 +110,33 @@ export class XyUserService {
                 }
             })
             await page.goto('https://www.goofish.com/im')
-        }else{
+        } else {
+            sendService.log2renderer('绑定失败', '登录超时，请重试', 0, true)
             wind.close()
             return
         }
-         // 等待读取用户信息
-         await waitFor(() => userInfo.userId != '' && userInfo.displayName != '', 10)
-         const cookies = await page.cookies()
-         userInfo.cookies = cookies
-         await this.userImLogin(userInfo)
-         wind.close()
+        // 等待读取用户信息
+        await waitFor(() => userInfo.userId != '' && userInfo.displayName != '', 10)
+        const cookies = await page.cookies()
+        userInfo.cookies = cookies
+        sendService.log2renderer('登录成功', userInfo.displayName + ' 登录成功', 1, true)
+        await this.userImLogin(userInfo)
+        wind.close()
     }
 
-    async reLogin(userId:string){
+    async reLogin(userId: string) {
         const user = userGet(userId)
-        if(!user) {
+        if (!user) {
             //
+            sendService.log2renderer(`登录失败`, `用户${userId}不存在，请重新登录`, 0)
             return
         }
-        let newAccessToken:string = ''
+        let newAccessToken: string = ''
         const wind = windowService.createXyWindow()
         const page = await browserService.getPage(wind)
-        if(!page) {
-            // 
+        if (!page) {
+            //
+            sendService.log2renderer(`登录失败`, `打开页面失败，请重新登录`, 0)
             wind.close()
             return
         }
@@ -127,25 +160,40 @@ export class XyUserService {
                 timeout: 30 * 6000
             })
         } catch (_) {
-            // 
+            //
+            sendService.log2renderer(`登录失败`, `跳转聊天界面失败，用户已过期，请重新登录`, 0)
             userRemove(user)
+            sendService.send2renderer('refreshUserList')
             wind.close()
             return
         }
         try {
             await waitFor(() => newAccessToken != '')
-            // notifyAndLog(`登录成功`, '用户' + user.displayName + ' 登录成功', false)
+            sendService.log2renderer(`登录成功`, '用户' + user.displayName + ' 登录成功', 1)
             user.lastLogin = new Date().getTime() + ''
             user.cookies = await page.cookies()
             userUpdate(user)
+            sendService.send2renderer('refreshUserList')
+            await this.userImLogin(user)
             return
         } catch (err: any) {
-            // notifyAndLog(`登录失败`, '用户 ' + user.displayName + ' 登录失败：' + err.message, true)
+            sendService.log2renderer(
+                `登录失败`,
+                '用户 ' + user.displayName + ' 登录失败：' + err.message,
+                0,
+                true
+            )
             wind.close()
             userRemove(user)
-            // store.set('userList', newList)
-            // ipc2RenderRefreshUserList()
+            sendService.send2renderer('refreshUserList')
             return
+        }
+    }
+
+    async initUserImLogin() {
+        const users = userList()
+        for (const user of users) {
+            await this.userImLogin(user)
         }
     }
 }

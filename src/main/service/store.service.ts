@@ -17,7 +17,7 @@ export function userAdd(user:GooFishUser){
     }
     const userList = store.get('userList')
     userList.unshift(user)
-    store.get('userList',userList)
+    store.set('userList',userList)
 }
 
 export function userRemove(user:GooFishUser){
