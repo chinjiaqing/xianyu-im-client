@@ -1,10 +1,10 @@
 {
   "name": "xianyu-im",
-  "version": "1.0.0",
+  "version": "1.0.10",
   "description": "闲鱼聊天客户端",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "https://github.com/chinjiaqing",
+  "homepage": "https://github.com/chinjiaqing",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --fix .",

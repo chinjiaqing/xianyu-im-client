@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { DEBUG_HOST, DEBUG_PORT } from './config'
 import browserService from './service/browser.service'
 import './ipc.main'
+import icon from '../../resources/icon.png?asset'
 import sendService from './service/send.service'
 import emitterService from './service/emitter.service'
 async function createWindow(): Promise<BrowserWindow> {
@@ -12,12 +13,12 @@ async function createWindow(): Promise<BrowserWindow> {
         height: 667,
         show: false,
         autoHideMenuBar: true,
-        icon: path.join(app.getAppPath(), 'resources/icon.png'),
+        icon: icon,
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
             sandbox: false,
             allowRunningInsecureContent: true,
-            webSecurity: true
+            webSecurity: true,
         }
         // frame:false,
         // transparent:true,
@@ -39,7 +40,9 @@ async function createWindow(): Promise<BrowserWindow> {
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
     } else {
-        mainWindow.loadFile(join(app.getAppPath(), '../renderer/index.html'))
+        mainWindow.loadFile(join(__dirname, '../renderer/index.html'),{
+            hash:'home'
+        })
     }
 
     mainWindow.on('close', (e) => {
@@ -57,7 +60,7 @@ async function createWindow(): Promise<BrowserWindow> {
 app.commandLine.appendSwitch('remote-debugging-port', DEBUG_PORT)
 app.commandLine.appendSwitch('remote-debugging-address', DEBUG_HOST)
 app.commandLine.appendSwitch('disable-web-security', 'NetworkService')
-app.commandLine.appendSwitch('user-data-dir', path.resolve(__dirname, '/temp/chrome'))
+app.commandLine.appendSwitch('user-data-dir', path.resolve(app.getAppPath(), '/temp/chrome'))
 app.whenReady().then(async () => {
     electronApp.setAppUserModelId('com.electron')
     app.on('browser-window-created', (_, window) => {
@@ -80,8 +83,8 @@ app.whenReady().then(async () => {
     // 创建托盘图标（推荐PNG格式适配多平台）
     let isFlashing = false;
     let flashInterval;
-    let originalIcon = path.join(app.getAppPath(), 'resources/icon.png')
-    let flashingIcon = path.join(app.getAppPath(), 'resources/icon-flash.png')
+    let originalIcon = join(__dirname,'../../resources/icon.png')
+    let flashingIcon = join(__dirname,'../../resources/icon-flash.png')
     let tray = new Tray(
         nativeImage.createFromPath(originalIcon)
     )
@@ -106,7 +109,15 @@ app.whenReady().then(async () => {
     })
     const contextMenu = Menu.buildFromTemplate([
         { label: '主界面', click: () => mainWindow.show() },
-        { label: '退出', click: () => app.quit() }
+        { label: '退出', click: () => {
+            stopFlashing()
+            tray.destroy()
+            if(process.platform !== 'darwin') {
+                app.exit(0)
+            }else{
+                app.quit()
+            }
+        } }
     ])
     tray.setContextMenu(contextMenu)
 
