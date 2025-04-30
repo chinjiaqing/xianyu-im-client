@@ -7,6 +7,9 @@ import './ipc.main'
 import icon from '../../resources/icon.png?asset'
 import sendService from './service/send.service'
 import emitterService from './service/emitter.service'
+// import log from 'electron-log/main';
+
+// log.initialize()
 async function createWindow(): Promise<BrowserWindow> {
     const mainWindow = new BrowserWindow({
         width: 375,
@@ -83,8 +86,8 @@ app.whenReady().then(async () => {
     // 创建托盘图标（推荐PNG格式适配多平台）
     let isFlashing = false;
     let flashInterval;
-    let originalIcon = join(__dirname,'../../resources/icon.png')
-    let flashingIcon = join(__dirname,'../../resources/icon-flash.png')
+    let originalIcon = join(app.getAppPath(),'../resources/icon.png')
+    let flashingIcon = join(app.getAppPath(),'../resources/icon-flash.png')
     let tray = new Tray(
         nativeImage.createFromPath(originalIcon)
     )

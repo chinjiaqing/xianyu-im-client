@@ -4,8 +4,15 @@
     "productName": "闲鱼IM",
     "directories": {
         "output": "release/${version}",
-        "buildResources": "resources"
+        "buildResources": "build"
     },
+    "extraResources": [
+        {
+            "from": "resources/",
+            "to": "resources",
+            "filter": ["**/*"]
+        }
+    ],
     "files": [
         "out/main/**/*",
         "out/preload/**/*",
@@ -31,15 +38,15 @@
                 "arch": ["x64"]
             }
         ],
-        "icon": "resources/logo.ico",
-        "requestedExecutionLevel": "requireAdministrator",
+        "icon": "resources/icon.png",
+        // "requestedExecutionLevel": "requireAdministrator",
         "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
     },
     "nsis": {
         "oneClick": false,
         "perMachine": true,
         "allowToChangeInstallationDirectory": true,
-        "deleteAppDataOnUninstall": false,
+        "deleteAppDataOnUninstall": true,
         "createDesktopShortcut": true,
         "createStartMenuShortcut": true
     },
