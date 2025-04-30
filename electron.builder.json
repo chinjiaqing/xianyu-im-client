@@ -1,0 +1,50 @@
+{
+    "appId": "com.goofish.xxx",
+    "asar": true,
+    "productName": "闲鱼IM",
+    "directories": {
+        "output": "release/${version}",
+        "buildResources": "resources"
+    },
+    "files": [
+        "out/main/**/*",
+        "out/preload/**/*",
+        "out/renderer/**/*",
+        "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+        "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+        "!**/*.map",
+        "!**/.vscode/*",
+        "!src/*",
+        "!electron.vite.config.{js,ts,mjs,cjs}",
+        "!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}",
+        "!{.env,.env.*,.npmrc,pnpm-lock.yaml}",
+        "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
+    ],
+    "mac": {
+        "target": ["dmg"],
+        "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
+    },
+    "win": {
+        "target": [
+            {
+                "target": "nsis",
+                "arch": ["x64"]
+            }
+        ],
+        "icon": "resources/logo.ico",
+        "requestedExecutionLevel": "requireAdministrator",
+        "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+    },
+    "nsis": {
+        "oneClick": false,
+        "perMachine": true,
+        "allowToChangeInstallationDirectory": true,
+        "deleteAppDataOnUninstall": false,
+        "createDesktopShortcut": true,
+        "createStartMenuShortcut": true
+    },
+    "linux": {
+        "target": ["AppImage"],
+        "artifactName": "${productName}-Linux-${version}.${ext}"
+    }
+}
