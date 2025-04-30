@@ -187,7 +187,7 @@ export class XyImService {
     }
 
     // 发送自定义回复的消息
-    async sendReplyMsg(cid:string,toid: string, text: string) {
+    async sendReplyMsg(toid: string, text: string) {
         try {
             // 构建文本内容
             const textContent = {
@@ -205,7 +205,7 @@ export class XyImService {
             const msg = this.createMsgPayload('/r/MessageSend/sendByReceiverScope', [
                 {
                     uuid: xyJsModule.generate_uuid(),
-                    cid: `${cid}@goofish`,
+                    cid: `${toid}@goofish`,
                     conversationType: 1,
                     content: {
                         contentType: 101,
@@ -226,7 +226,7 @@ export class XyImService {
                     msgReadStatusSetting: 1
                 },
                 {
-                    actualReceivers: [`${toid}@goofish`, `${cid}@goofish`]
+                    actualReceivers: [`${this.user.userId}@goofish`, `${toid}@goofish`]
                 }
             ])
             this.ws?.send(msg)
