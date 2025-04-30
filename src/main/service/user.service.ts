@@ -171,9 +171,10 @@ export class XyUserService {
         }
         try {
             await waitFor(() => newAccessToken != '')
-            sendService.log2renderer(`登录成功`, '用户' + user.displayName + ' 登录成功', 1)
+            sendService.log2renderer(`登录成功`, user.displayName, 1)
             user.lastLogin = new Date().getTime() + ''
             user.cookies = await page.cookies()
+            user.unread = false
             userUpdate(user)
             sendService.send2renderer('refreshUserList')
             await this.userImLogin(user)
