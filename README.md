@@ -9,7 +9,7 @@
 
 基于 `electron` + `vite` + `vue` + `nodejs` 编写的具有闲鱼账号收发消息的桌面APP（仅在win端开发与测试）。
 
-![预览图](docs/images/des.png)
+![预览图](docs/images/cover.png)
 
 ## 基本功能
 
