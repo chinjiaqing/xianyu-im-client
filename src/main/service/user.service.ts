@@ -196,6 +196,8 @@ export class XyUserService {
     async initUserImLogin() {
         const users = userList()
         for (const user of users) {
+            user.unread = false
+            userUpdate(user)
             await this.userImLogin(user)
         }
     }
