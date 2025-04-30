@@ -22,8 +22,10 @@ class ImageMsgHandler implements MessageHandler {
 }
 
 class TextMsgHandler implements MessageHandler {
-    async handle(msg: MsgFormattedPayload) {
+    async handle(msg: MsgFormattedPayload,wsService:XyImService) {
         if (msg.type !== MsgTypes.TEXT) return
+        // 自动回复参考
+        wsService.sendReplyMsg(msg.toUserId,msg.senderUserId,'你好呀')
     }
 }
 

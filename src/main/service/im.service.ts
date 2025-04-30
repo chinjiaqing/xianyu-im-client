@@ -90,6 +90,7 @@ export class XyImService {
                     const senderName = msg['1']['10']['reminderTitle']
                     const senderUserId = msg['1']['10']['senderUserId']
                     const content = msg['1']['10']['reminderContent']
+                    const cid = msg['1']['2'].split('@')[0]
                     const msgInfoStr = msg['1']['6']['3']['5']
                     const msgInfo = JSON.parse(msgInfoStr)
                     const formattedMsg: MsgFormattedPayload = {
@@ -97,7 +98,8 @@ export class XyImService {
                         senderUserId,
                         content,
                         images: [],
-                        type: MsgTypes.TEXT
+                        type: MsgTypes.TEXT,
+                        toUserId:cid
                     }
                     if (msgInfo.contentType == 2 && msgInfo.image) {
                         formattedMsg.type = MsgTypes.IMAGE
@@ -185,7 +187,7 @@ export class XyImService {
     }
 
     // 发送自定义回复的消息
-    async sendReplyMsg(cid: string, toid: string, text: string) {
+    async sendReplyMsg(cid:string,toid: string, text: string) {
         try {
             // 构建文本内容
             const textContent = {

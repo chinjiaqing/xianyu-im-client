@@ -7,9 +7,10 @@ export enum MsgTypes {
 
 //格式化后的消息体
 export interface MsgFormattedPayload {
-    type: MsgTypes
-    senderUserId: string
-    senderName: string
-    content: string
-    images: string[]
+    type: MsgTypes; //消息类型
+    senderUserId: string; //发送消息的人
+    senderName: string; // 发送消息人的id
+    content: string; // 内容
+    images: string[]; // 图片
+    toUserId:string; //接收消息的人的ID，不同于UserId
 }
