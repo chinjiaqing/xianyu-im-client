@@ -17,6 +17,7 @@ export class XyUserService {
         await xyImService.init()
         this.users.set(user.userId, xyImService)
         xyImService.on('message', (msg) => {
+            xyImService.readMsg(msg); // 此处自动已读消息
             msgService.handleMsg(msg, xyImService)
             sendService.log2renderer(`新消息`, JSON.stringify(msg))
             const olduser = userGet(user.userId)
