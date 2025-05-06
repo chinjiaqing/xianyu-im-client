@@ -99,7 +99,7 @@ export class XyImService {
                         content,
                         images: [],
                         type: MsgTypes.TEXT,
-                        toUserId:cid
+                        cid:cid
                     }
                     if (msgInfo.contentType == 2 && msgInfo.image) {
                         formattedMsg.type = MsgTypes.IMAGE
@@ -187,7 +187,7 @@ export class XyImService {
     }
 
     // 发送自定义回复的消息
-    async sendReplyMsg(toid: string, text: string) {
+    async sendReplyMsg(toid: string, cid:string, text: string) {
         try {
             // 构建文本内容
             const textContent = {
@@ -205,7 +205,7 @@ export class XyImService {
             const msg = this.createMsgPayload('/r/MessageSend/sendByReceiverScope', [
                 {
                     uuid: xyJsModule.generate_uuid(),
-                    cid: `${toid}@goofish`,
+                    cid: `${cid}@goofish`,
                     conversationType: 1,
                     content: {
                         contentType: 101,

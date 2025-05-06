@@ -12,5 +12,6 @@ export interface MsgFormattedPayload {
     senderName: string; // 发送消息人的id
     content: string; // 内容
     images: string[]; // 图片
-    toUserId:string; //接收消息的人的ID，不同于UserId
+    // toUserId:string; //接收消息的人的ID，不同于UserId
+    cid:string;
 }
